@@ -59,9 +59,9 @@ class HelloExtension extends Extension {
 
   @listener({
     event: 'messageCreate',
-    emitter: 'discord'
   })
   async heyRas(msg: Message) {
+    if (msg.author.bot) return
     if (!msg.content.startsWith('라즈야 ')) return
 
     const keyword: string = msg.content.slice(4)
