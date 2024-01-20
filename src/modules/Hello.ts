@@ -2,6 +2,7 @@ import fs from 'fs'
 import { config } from '../config'
 import { Extension, applicationCommand, listener } from '@pikokr/command.ts'
 import { ApplicationCommandType, ChatInputCommandInteraction, Message } from 'discord.js'
+import { log } from 'console';
 
 interface HeyRas {
   command: commands[];
@@ -62,6 +63,7 @@ class HelloExtension extends Extension {
   })
   async heyRas(msg: Message) {
     if (msg.author.bot) return
+    log(msg.content)
     if (!msg.content.startsWith('라즈야 ')) return
 
     const keyword: string = msg.content.slice(4)
