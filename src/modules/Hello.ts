@@ -22,13 +22,11 @@ class HelloExtension extends Extension {
     await i.reply(`current ping: ${i.client.ws.ping}ms`)
   }
 
-  @applicationCommand(
-    {
-      name: '안녕',
-      type: ApplicationCommandType.ChatInput,
-      description: '안녕하세요',
-    }
-  )
+  @applicationCommand({
+    name: '안녕',
+    type: ApplicationCommandType.ChatInput,
+    description: '안녕하세요',
+  })
   async hello(i: ChatInputCommandInteraction) {
     await i.reply('안녕하세요, 세상이여!')
   }
