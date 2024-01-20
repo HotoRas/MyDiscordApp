@@ -1,3 +1,4 @@
+import { config } from '../config'
 import { Extension, applicationCommand, listener } from '@pikokr/command.ts'
 import { ApplicationCommandType, ChatInputCommandInteraction } from 'discord.js'
 
@@ -29,6 +30,18 @@ class HelloExtension extends Extension {
   })
   async hello(i: ChatInputCommandInteraction) {
     await i.reply('안녕하세요, 세상이여!')
+  }
+
+  @applicationCommand({
+    name: 'restart',
+    type: ApplicationCommandType.ChatInput,
+    description: '다시 시작하시려고요?'
+  })
+  async restart(i: ChatInputCommandInteraction) {
+
+    await i.reply('다시 시작할게요..')
+      .then(msg => this.client.destroy())
+      .then(() => this.client.login(config.token))
   }
 }
 
