@@ -1,6 +1,19 @@
+import fs from 'fs'
 import { config } from '../config'
 import { Extension, applicationCommand, listener } from '@pikokr/command.ts'
-import { ApplicationCommandType, ChatInputCommandInteraction } from 'discord.js'
+import { ApplicationCommandType, ChatInputCommandInteraction, Message } from 'discord.js'
+
+interface HeyRas {
+  command: commands[];
+}
+interface commands {
+  question: string;
+  answer: string;
+}
+
+const jsonFile = fs.readFileSync('./HeyRas.json', 'utf8')
+const jsonData: HeyRas = JSON.parse(jsonFile)
+const command = jsonData.command
 
 class HelloExtension extends Extension {
   @listener({ event: 'ready' })
@@ -42,6 +55,22 @@ class HelloExtension extends Extension {
     await i.reply('다시 시작할게요..')
       .then(msg => this.client.destroy())
       .then(() => this.client.login(config.token))
+  }
+
+  @listener({
+    event: 'messageCreate',
+    emitter: 'discord'
+  })
+  async heyRas(msg: Message) {
+    if (!msg.content.startsWith('라즈야 ')) return
+
+    const keyword: string = msg.content.slice(4)
+    const answer = command.find((message) => message.question === keyword)
+
+    if (!answer) {
+      return await msg.reply('미안, 뭔 말인지 모르겠어..')
+    }
+    await msg.reply(answer.answer)
   }
 }
 
