@@ -20,14 +20,14 @@ const commandTable: string = 'public.command'
  * @returns 쿼리 결과
  * @throws error: 쿼리 오류. 보통 서버가 없거나 파일을 못 찾았거나.
  */
-export const searchCommand = async (mycmd: MyCommand) => {
+export const searchCommand = async (cmd: string) => {
     /*const db = await knex(commandTable)
         .where('id', 1)
         .first();*/
 
     const database = await connection.connect()
-    const searchQuery: string = `select * from ${commandTable} where command = '$1' and answer = '$2';`
-    const params = [mycmd.command, mycmd.answer]
+    const searchQuery: string = `select * from ${commandTable} where command = $1;`
+    const params = [cmd]
     try {
         return new Promise((resolve, rejects) => {
             database.query(searchQuery, params, (err, res) => {
@@ -53,12 +53,12 @@ export const searchCommand = async (mycmd: MyCommand) => {
  */
 export const addCommand = async (command: string, answer: string) => {
     const database = await connection.connect()
-    const addQuery: string = `insert into ${commandTable} values ( '$1', '$2' );`
+    const addQuery: string = `insert into ${commandTable} values ( $1, $2 );`
     try {
-        const mycmd: MyCommand = JSON.parse(`{"command": "${command}", "answer": "${answer}"}`)
-        let result: any = await searchCommand(mycmd)
+        let result: any = await searchCommand(command)
+        log(result)
         if (result.rowCount > 0) {
-            const query: string = `update ${commandTable} set answer = '$2' where command = '$1';`
+            const query: string = `update ${commandTable} set answer = $2 where command = $1;`
             result = await new Promise((resolve, rejects) => {
                 database.query(query, [command, answer], (err, res) => {
                     if (err) {

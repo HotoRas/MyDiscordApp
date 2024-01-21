@@ -1,7 +1,9 @@
 import fs from 'fs'
 import { config } from '../config'
+import { searchCommand } from './LearnIt'
 import { Extension, applicationCommand, listener } from '@pikokr/command.ts'
 import { ApplicationCommandType, ChatInputCommandInteraction, Message } from 'discord.js'
+import { log } from 'console'
 
 interface HeyRas {
   command: commands[]
@@ -54,12 +56,13 @@ class HelloExtension extends Extension {
     if (!msg.content.startsWith('라즈야 ')) return
 
     const keyword: string = msg.content.slice(4)
-    const answer = command.find((cmd) => cmd.question === keyword)
+    const query: any = await searchCommand(keyword)
 
-    if (!answer) {
-      return await msg.reply('미안, 뭔 말인지 모르겠어..\n`/배워`로 추가한 명령어는 바로 답변하지 못할 수 있어요!')
+    if (query.rowCount === 0) {
+      return await msg.reply('미안, 뭔 말인지 모르겠어..')
     }
-    await msg.reply(answer.answer)
+    const answer = query.rows[0].answer
+    await msg.reply(answer)
   }
 }
 
