@@ -1,21 +1,7 @@
-import fs from 'fs'
-import { config } from '../config'
 import { searchCommand } from './LearnIt'
 import { Extension, applicationCommand, listener } from '@pikokr/command.ts'
 import { ApplicationCommandType, ChatInputCommandInteraction, Message } from 'discord.js'
 import { log } from 'console'
-
-interface HeyRas {
-  command: commands[]
-}
-interface commands {
-  question: string
-  answer: string
-}
-
-const jsonFile = fs.readFileSync('./HeyRas.json', 'utf8')
-const jsonData: HeyRas = JSON.parse(jsonFile)
-const command = jsonData.command
 
 class HelloExtension extends Extension {
   @listener({ event: 'ready' })
