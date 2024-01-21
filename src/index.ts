@@ -3,12 +3,7 @@ import { CustomizedCommandClient } from './structures'
 import { Client, GatewayIntentBits } from 'discord.js'
 
 const client = new Client({
-  //intents: ['Guilds', 'DirectMessages', 'MessageContent'],
-  intents: [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.DirectMessages,
-    GatewayIntentBits.MessageContent
-  ]
+  intents: ['Guilds', 'DirectMessages', 'GuildMessages', 'MessageContent'],
 })
 
 const cts = new CustomizedCommandClient(client)

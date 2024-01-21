@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { Extension, applicationCommand, option } from '@pikokr/command.ts'
-import { ApplicationCommandOptionType, ApplicationCommandType, ChatInputCommandInteraction, Embed, EmbedBuilder } from 'discord.js'
+import { ApplicationCommandOptionType, ApplicationCommandType, ChatInputCommandInteraction, EmbedBuilder } from 'discord.js'
 
 const muvelUrl: string = 'https://muvel.kimustory.net'
 const muvelApi: string = `${muvelUrl}/api`
@@ -61,7 +61,7 @@ class MuvelExtension extends Extension {
             )
             .setTimestamp()
             .setFooter({
-                text: `소설 ID: ${novel.id}  제공: Muvel - 당신의 이야기를 담은 작은 방`
+                text: `소설 ID: ${novel.id} • 제공: Muvel - 당신의 이야기를 담은 작은 방`
             })
         await i.reply({ embeds: [embed] })
     }
