@@ -43,6 +43,7 @@ class MuvelExtension extends Extension {
         })
         title: string
     ) {
+        if (i.guildId === "604137297033691137" && i.channelId === "858627537994383401") return
         const url = (title) ? `${muvelApiNovelsTitle}${title}` : muvelApiNovels
         let novel: muvelNovel
         try {
