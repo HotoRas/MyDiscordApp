@@ -1,0 +1,7 @@
+create user $username password '$password' createdb;
+create database $name owner $username;
+
+alter database $name owner to $username;
+
+// do not use
+// create user $username password '$password' superuser;

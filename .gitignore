@@ -6,3 +6,6 @@ dist
 # visual
 .vs
 .vscode
+
+# sql
+sql-config.json

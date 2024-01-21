@@ -57,7 +57,7 @@ class HelloExtension extends Extension {
     const answer = command.find((cmd) => cmd.question === keyword)
 
     if (!answer) {
-      return await msg.reply('미안, 뭔 말인지 모르겠어..')
+      return await msg.reply('미안, 뭔 말인지 모르겠어..\n`/배워`로 추가한 명령어는 바로 답변하지 못할 수 있어요!')
     }
     await msg.reply(answer.answer)
   }
