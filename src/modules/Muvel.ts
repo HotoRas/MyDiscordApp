@@ -44,14 +44,15 @@ class MuvelExtension extends Extension {
         title: string
     ) {
         const url = (title) ? `${muvelApiNovelsTitle}${title}` : muvelApiNovels
+        let novel: muvelNovel
         try {
             const result = await axios.get<muvelNovel[]>(url)
+            novel = result.data[0]
         }
-        catch(error) {
+        catch (error) {
             return await i.reply('Muvel 서버에 연결하지 못했어요..')
         }
-        const novel: muvelNovel = result.data[0]
-        if(!novel) {
+        if (!novel) {
             return await i.reply('검색 결과가 없어요.')
         }
         const embed = new EmbedBuilder()
