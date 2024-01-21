@@ -1,13 +1,7 @@
-import { knex } from '../config'
 import { connection } from '../pgsql'
 import { Extension, applicationCommand, option } from '@pikokr/command.ts'
 import { log } from 'console'
 import { ApplicationCommandOptionType, ApplicationCommandType, ChatInputCommandInteraction } from 'discord.js'
-
-interface MyCommand {
-    command: string
-    answer: string
-}
 
 const commandTable: string = 'public.command'
 
@@ -21,10 +15,6 @@ const commandTable: string = 'public.command'
  * @throws error: 쿼리 오류. 보통 서버가 없거나 파일을 못 찾았거나.
  */
 export const searchCommand = async (cmd: string) => {
-    /*const db = await knex(commandTable)
-        .where('id', 1)
-        .first();*/
-
     const database = await connection.connect()
     const searchQuery: string = `select * from ${commandTable} where command = $1;`
     const params = [cmd]
@@ -34,7 +24,6 @@ export const searchCommand = async (cmd: string) => {
                 if (err) {
                     log('error: error on Learnit.ts:30:')
                     log(err)
-                    //throw (err)
                     rejects(err)
                 }
                 resolve(res)
@@ -42,7 +31,6 @@ export const searchCommand = async (cmd: string) => {
         })
     } catch (err) { throw (err) }
     finally { database.release() }
-    /* */
 }
 
 /**
@@ -62,7 +50,6 @@ export const addCommand = async (command: string, answer: string) => {
             result = await new Promise((resolve, rejects) => {
                 database.query(query, [command, answer], (err, res) => {
                     if (err) {
-                        //throw (err)
                         log('error: error on Learnit.ts:58:')
                         log(err)
                         rejects(err)
@@ -80,8 +67,7 @@ export const addCommand = async (command: string, answer: string) => {
             })
         }
     } catch (err) {
-        throw err
-        // return 500 // server offline
+        return 500 // server offline
     } finally { database.release() }
     return 200 // add done
 }
