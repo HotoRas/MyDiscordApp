@@ -59,14 +59,14 @@ class MuvelExtension extends Extension {
             .setTitle(novel.title)
             .setDescription(novel.description)
             .setURL(`${muvelUrl}/novels/${novel.id}`)
-            .setAuthor({ name: `${novel.author.username} (${novel.author.id})`, iconURL: novel.author.avatar })
+            .setAuthor({ name: `${novel.author.username.endsWith('#0') ? novel.author.username.slice(0, -2) : novel.author.username} (${novel.author.id})`, iconURL: novel.author.avatar })
             .setThumbnail(novel.thumbnail)
             .addFields(
                 { name: '생성 시각', value: novel.createdAt },
                 { name: '수정 시각', value: novel.updatedAt }
             )
             .addFields(
-                { name: '에피소드', value: novel.episodeIds.join(', ') }
+                { name: '에피소드', value: novel.episodeIds.map((s) => '[' + s + '](' + muvelUrl + '/episodes/' + s + ')').join('\n') }
             )
             .setTimestamp()
             .setFooter({
