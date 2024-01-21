@@ -1,6 +1,6 @@
 import { searchCommand } from './LearnIt'
-import { Extension, applicationCommand, listener } from '@pikokr/command.ts'
-import { ApplicationCommandType, ChatInputCommandInteraction, Message } from 'discord.js'
+import { Extension, applicationCommand, listener, ownerOnly } from '@pikokr/command.ts'
+import { ApplicationCommandType, ChatInputCommandInteraction, Message, PermissionFlagsBits } from 'discord.js'
 import { log } from 'console'
 
 class HelloExtension extends Extension {
@@ -32,6 +32,19 @@ class HelloExtension extends Extension {
   async hello(i: ChatInputCommandInteraction) {
     await i.reply('안녕하세요, 세상이여!')
   }
+
+  /*
+  @applicationCommand({
+    name: 'kill',
+    type: ApplicationCommandType.ChatInput,
+    description: '라즈봇을 완전히 종료해요'
+  })
+  @ownerOnly
+  async kill(i: ChatInputCommandInteraction) {
+    await i.reply('종료할게요. 다시 실행하려면 봇 관리자에게 문의해주세요.')
+    throw new Error()
+  }
+  */
 
   @listener({
     event: 'messageCreate',
