@@ -31,7 +31,7 @@ class MuvelExtension extends Extension {
     @applicationCommand({
         name: '뮤블검색',
         type: ApplicationCommandType.ChatInput,
-        description: '뮤블에 올라와 있는 검색 결과를 받아서 알려줘요'
+        description: '뮤블에 올라와 있는 소설의 검색 결과를 받아서 알려줘요'
     })
     async muvelSearch(
         i: ChatInputCommandInteraction,
@@ -44,8 +44,16 @@ class MuvelExtension extends Extension {
         title: string
     ) {
         const url = (title) ? `${muvelApiNovelsTitle}${title}` : muvelApiNovels
-        const result = await axios.get<muvelNovel[]>(url)
+        try {
+            const result = await axios.get<muvelNovel[]>(url)
+        }
+        catch(error) {
+            return await i.reply('Muvel 서버에 연결하지 못했어요..')
+        }
         const novel: muvelNovel = result.data[0]
+        if(!novel) {
+            return await i.reply('검색 결과가 없어요.')
+        }
         const embed = new EmbedBuilder()
             .setTitle(novel.title)
             .setDescription(novel.description)
