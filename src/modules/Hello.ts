@@ -30,7 +30,7 @@ class HelloExtension extends Extension {
     description: '안녕하세요',
   })
   async hello(i: ChatInputCommandInteraction) {
-    await i.reply('안녕하세요, 세상이여!')
+    await i.reply(`안녕하세요, ${i.user.username}님!`)
   }
 
   /*
