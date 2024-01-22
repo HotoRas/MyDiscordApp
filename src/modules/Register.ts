@@ -192,14 +192,15 @@ class UserRegisterExtension extends Extension {
         if (isSameDate(lastVis, now)) {
             return await i.reply('하루에 한 번만 출석체크할 수 있어요. 자정 (한국 시간) 이후에 다시 시도해주세요!')
         }
+        const add: number = isSameDate(lastVis, getYesterday()) ? 150 : 100
         let returned: number = 0
         try {
-            returned = await addMoney(i.user.id, isSameDate(lastVis, getYesterday()) ? 150 : 100, true)
+            returned = await addMoney(i.user.id, add, true)
         } catch {
             return await i.reply('출석체크에 실패했어요.\n사용자 정보 데이터베이스에 연결할 수 없어요. 봇 관리자에 문의해주세요.')
         }
         if (returned === 200) {
-            return await i.reply(`출석체크가 완료되었습니다! 현재 돈: ${Number(uData.rows[0].balance) + (isSameDate(lastVis, getYesterday()) ? 150 : 100)}`)
+            return await i.reply(`출석체크가 완료되었습니다! 현재 돈: ${Number(uData.rows[0].balance) + add}`)
         }
         if (returned === 500) {
             return await i.reply('출석체크에 실패했어요.\n데이터베이스에 사용자 정보를 저장하지 못했어요. 봇 관리자에 문의해주세요!')
