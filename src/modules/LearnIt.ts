@@ -44,7 +44,7 @@ export const addCommand = async (command: string, answer: string) => {
     const addQuery: string = `insert into ${commandTable} values ( $1, $2 );`
     try {
         let result: any = await searchCommand(command)
-        log(result)
+        log(result.rows[0])
         if (result.rowCount > 0) {
             if (!result.rows[0].editable) {
                 return 403 // no permission
