@@ -37,7 +37,7 @@ export const searchCommand = async (cmd: string) => {
  * 명령어를 DB에 추가합니다.
  * @param command 추가할 명령어
  * @param answer 추가할 대답
- * @returns 200: 성공; 500: 오류
+ * @returns 200: 성공; 500: 오류; 403: 수정할 수 없음
  */
 export const addCommand = async (command: string, answer: string) => {
     const database = await connection.connect()
@@ -46,6 +46,9 @@ export const addCommand = async (command: string, answer: string) => {
         let result: any = await searchCommand(command)
         log(result)
         if (result.rowCount > 0) {
+            if (!result.rows[0].editable) {
+                return 403 // no permission
+            }
             const query: string = `update ${commandTable} set answer = $2 where command = $1;`
             result = await new Promise((resolve, rejects) => {
                 database.query(query, [command, answer], (err, res) => {
@@ -107,6 +110,9 @@ class LearnitExtension extends Extension {
         }
         if (returned === 500) {
             return await i.reply('명령어 추가에 실패했어요...\n데이터베이스에 명령어를 저장하지 못했어요. 봇 관리자에 문의해주세요!')
+        }
+        if (returned === 403) {
+            return await i.reply(`기존 '라즈야 ${question}' 명령어가 수정할 수 없게 되어 있는 것 같아요!`)
         }
     }
 }
