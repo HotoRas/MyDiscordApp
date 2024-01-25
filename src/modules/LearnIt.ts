@@ -2,6 +2,7 @@ import { connection } from '../pgsql'
 import { Extension, applicationCommand, option } from '@pikokr/command.ts'
 import { log } from 'console'
 import { ApplicationCommandOptionType, ApplicationCommandType, ChatInputCommandInteraction } from 'discord.js'
+import { PoolClient, QueryResult } from 'pg'
 
 const commandTable: string = 'public.command'
 
@@ -14,12 +15,12 @@ const commandTable: string = 'public.command'
  * @returns 쿼리 결과
  * @throws error: 쿼리 오류. 보통 서버가 없거나 파일을 못 찾았거나.
  */
-export const searchCommand = async (cmd: string) => {
-    const database = await connection.connect()
+export const searchCommand = async (cmd: string): Promise<QueryResult<any>> => {
+    const database: PoolClient = await connection.connect()
     const searchQuery: string = `select * from ${commandTable} where command = $1;`
-    const params = [cmd]
+    const params: string[] = [cmd]
     try {
-        return new Promise((resolve, rejects) => {
+        return new Promise<QueryResult>((resolve, rejects) => {
             database.query(searchQuery, params, (err, res) => {
                 if (err) {
                     log('error: error on Learnit.ts:30:')
@@ -39,18 +40,19 @@ export const searchCommand = async (cmd: string) => {
  * @param answer 추가할 대답
  * @returns 200: 성공; 500: 오류; 403: 수정할 수 없음
  */
-export const addCommand = async (command: string, answer: string) => {
-    const database = await connection.connect()
+export const addCommand = async (command: string, answer: string): Promise<number> => {
+    const database: PoolClient = await connection.connect()
     const addQuery: string = `insert into ${commandTable} values ( $1, $2 );`
     try {
-        let result: any = await searchCommand(command)
+        let result: QueryResult<any> = await searchCommand(command)
         log(result.rows[0])
+        if (result.rowCount === null) result.rowCount = 0
         if (result.rowCount > 0) {
             if (!result.rows[0].editable) {
                 return 403 // no permission
             }
             const query: string = `update ${commandTable} set answer = $2 where command = $1;`
-            result = await new Promise((resolve, rejects) => {
+            result = await new Promise<QueryResult>((resolve, rejects) => {
                 database.query(query, [command, answer], (err, res) => {
                     if (err) {
                         log('error: error on Learnit.ts:58:')
@@ -62,7 +64,7 @@ export const addCommand = async (command: string, answer: string) => {
             })
         }
         else {
-            result = await new Promise((resolve, rejects) => {
+            result = await new Promise<QueryResult>((resolve, rejects) => {
                 database.query(addQuery, [command, answer], (err, res) => {
                     if (err) { rejects(err) }
                     resolve(res)

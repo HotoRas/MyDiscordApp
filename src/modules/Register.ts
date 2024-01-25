@@ -2,6 +2,7 @@ import { connection } from '../pgsql'
 import { Extension, applicationCommand, option } from '@pikokr/command.ts'
 import { log } from 'console'
 import { ApplicationCommandType, ChatInputCommandInteraction } from 'discord.js'
+import { PoolClient, QueryResult } from 'pg'
 
 const userTable: string = 'public.user'
 
@@ -10,10 +11,10 @@ function isSameDate(a: Date, b: Date): boolean {
 }
 
 function getYesterday(): Date {
-    const today = new Date(Date.now())
-    let yyyy = today.getFullYear()
-    let mm = today.getMonth()
-    let dd = today.getDate()
+    const today: Date = new Date(Date.now())
+    let yyyy: number = today.getFullYear()
+    let mm: number = today.getMonth()
+    let dd: number = today.getDate()
     dd -= 1
     if (dd === 0) {
         mm -= 1
@@ -38,12 +39,12 @@ function getYesterday(): Date {
  * @returns 쿼리 결과
  * @throws error: 쿼리 오류. 보통 서버가 없거나 파일을 못 찾았거나.
  */
-export const searchUser = async (id: string) => {
-    const database = await connection.connect()
+export const searchUser = async (id: string): Promise<QueryResult<any>> => {
+    const database: PoolClient = await connection.connect()
     const searchQuery: string = `select * from ${userTable} where id = $1;`
-    const params = [id]
+    const params: string[] = [id]
     try {
-        return new Promise((resolve, rejects) => {
+        return new Promise<QueryResult>((resolve, rejects) => {
             database.query(searchQuery, params, (err, res) => {
                 if (err) {
                     log('error: error on Register.ts:23:')
@@ -63,18 +64,21 @@ export const searchUser = async (id: string) => {
  * @param name 추가할 사용자의 닉네임
  * @returns 200: 성공; 201: 갱신됨; 500: 오류; 401: 이미 존재함
  */
-export const addUser = async (id: string, name: string) => {
-    const database = await connection.connect()
+export const addUser = async (id: string, name: string): Promise<number> => {
+    const database: PoolClient = await connection.connect()
     const addQuery: string = `insert into ${userTable} values ( $1, $2, 0, $3 );`
     const value: string[] = [id, name, '2000-01-01']
     try {
-        let result: any = await searchUser(id)
+        let result: QueryResult = await searchUser(id)
         log(result.rows)
+        if (result.rowCount === null) {
+            return 500
+        }
         if (result.rowCount > 0) {
             if (result.rows[0].name === name)
                 return 401 // exist
             else {
-                result = await new Promise((resolve, rejects) => {
+                result = await new Promise<QueryResult>((resolve, rejects) => {
                     database.query(`update ${userTable} set name = $2 where id = $1`, value, (err, res) => {
                         if (err) { rejects(err) }
                         resolve(res)
@@ -85,7 +89,7 @@ export const addUser = async (id: string, name: string) => {
 
         }
         else {
-            result = await new Promise((resolve, rejects) => {
+            result = await new Promise<QueryResult>((resolve, rejects) => {
                 database.query(addQuery, value, (err, res) => {
                     if (err) { rejects(err) }
                     resolve(res)
@@ -105,22 +109,22 @@ export const addUser = async (id: string, name: string) => {
  * @param moneyDelta 
  * @returns 200: 처리 완료; 500: 오류; 403: 찾을 수 없음
  */
-export const addMoney = async (id: string, moneyDelta: number, updateDate?: boolean) => {
-    const database = await connection.connect()
+export const addMoney = async (id: string, moneyDelta: number, updateDate?: boolean): Promise<number> => {
+    const database: PoolClient = await connection.connect()
     const addQuery: string = `update ${userTable} set balance = $2${updateDate ? ' , lastvisit = NOW() :: DATE' : ''} where id = $1::varchar`
     //log(addQuery)
-    let result: any
+    let result: QueryResult<any>
     try {
         result = await searchUser(id)
     }
     catch {
         return 403 // not found
     }
-    if (result.rowCount === 0) {
+    if (result.rowCount === 0 || result.rowCount === null) {
         return 403 // not found
     }
     //log(result.rows[0].balance)
-    const value = [id, (moneyDelta + Number(result.rows[0].balance)) < 0 ? 0 : moneyDelta + Number(result.rows[0].balance)]
+    const value: string[] = [id, (moneyDelta + Number(result.rows[0].balance)) < 0 ? '0' : (moneyDelta + Number(result.rows[0].balance)).toString()]
     //log(value)
     try {
         result = await new Promise((resolve, rejects) => {
@@ -172,7 +176,7 @@ class UserRegisterExtension extends Extension {
     async learnIt(i: ChatInputCommandInteraction) {
         if (i.guildId === "604137297033691137" && i.channelId === "858627537994383401") return
         let lastVis: Date
-        let uData: any
+        let uData: QueryResult<any>
         try {
             uData = await searchUser(i.user.id)
             //log(uData)
@@ -180,11 +184,11 @@ class UserRegisterExtension extends Extension {
         } catch {
             return await i.reply('사용자 검색에 실패했어요.\n사용자 정보 데이터베이스에 연결할 수 없어요. 봇 관리자에 문의해주세요.')
         }
-        if (uData.rowCount === 0) {
+        if (uData.rowCount === 0 || uData.rowCount === null) {
             return await i.reply("사용자 등록이 되어 있지 않아요! '/등록' 명령어를 이용해 등록해주세요.")
         }
 
-        const now = new Date(Date.now())
+        const now: Date = new Date(Date.now())
         //log(lastVis)
         //log(now)
         //log(`${lastVis.getDate()}, ${lastVis.getDay()}, ${lastVis.getFullYear()}`)

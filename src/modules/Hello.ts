@@ -2,6 +2,7 @@ import { searchCommand } from './LearnIt'
 import { Extension, applicationCommand, listener, ownerOnly } from '@pikokr/command.ts'
 import { ApplicationCommandType, ChatInputCommandInteraction, Message, PermissionFlagsBits } from 'discord.js'
 import { log } from 'console'
+import { QueryResult } from 'pg'
 
 class HelloExtension extends Extension {
   @listener({ event: 'ready' })
@@ -57,12 +58,12 @@ class HelloExtension extends Extension {
     if (!msg.content.startsWith('라즈야 ')) return
 
     const keyword: string = msg.content.slice(4)
-    const query: any = await searchCommand(keyword)
+    const query: QueryResult<any> = await searchCommand(keyword)
 
-    if (query.rowCount === 0) {
+    if (query.rowCount === 0 || query.rowCount === null) {
       return await msg.reply('미안, 뭔 말인지 모르겠어..')
     }
-    const answer = query.rows[0].answer
+    const answer: string = query.rows[0].answer
     await msg.reply(answer)
   }
 }
