@@ -1,4 +1,4 @@
-import axios from 'axios'
+import axios, { AxiosResponse } from 'axios'
 import { Extension, applicationCommand, option } from '@pikokr/command.ts'
 import { ApplicationCommandOptionType, ApplicationCommandType, ChatInputCommandInteraction, EmbedBuilder } from 'discord.js'
 
@@ -44,10 +44,10 @@ class MuvelExtension extends Extension {
         title: string
     ) {
         if (i.guildId === "604137297033691137" && i.channelId === "858627537994383401") return
-        const url = (title) ? `${muvelApiNovelsTitle}${title}` : muvelApiNovels
+        const url: string = (title) ? `${muvelApiNovelsTitle}${title}` : muvelApiNovels
         let novel: muvelNovel
         try {
-            const result = await axios.get<muvelNovel[]>(url)
+            const result: AxiosResponse<muvelNovel[]> = await axios.get<muvelNovel[]>(url)
             novel = result.data[0]
         }
         catch (error) {

@@ -2,6 +2,7 @@ import { connection } from '../pgsql'
 import { Extension, applicationCommand, option } from '@pikokr/command.ts'
 import { log } from 'console'
 import { ApplicationCommandOptionType, ApplicationCommandType, ChatInputCommandInteraction } from 'discord.js'
+import { User } from './Register'
 
 class EconomyExtension extends Extension {
     @applicationCommand({

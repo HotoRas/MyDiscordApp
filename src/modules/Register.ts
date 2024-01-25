@@ -54,7 +54,7 @@ export const searchUser = async (id: string): Promise<QueryResult<User>> => {
         return new Promise<QueryResult<User>>((resolve, rejects) => {
             database.query<User>(searchQuery, params, (err, res) => {
                 if (err) {
-                    log('error: error on Register.ts:23:')
+                    log('error: error on Register.ts:57:')
                     log(err)
                     rejects(err)
                 }
