@@ -6,6 +6,12 @@ import { PoolClient, QueryResult } from 'pg'
 
 const commandTable: string = 'public.command'
 
+export interface LearnableCommand {
+    command: string,
+    answer: string,
+    editable: boolean
+}
+
 /**
  * 본격적으로 더러워짐 -> 저도 몰라서 doc 작성합니다.
  * 
@@ -15,13 +21,13 @@ const commandTable: string = 'public.command'
  * @returns 쿼리 결과
  * @throws error: 쿼리 오류. 보통 서버가 없거나 파일을 못 찾았거나.
  */
-export const searchCommand = async (cmd: string): Promise<QueryResult<any>> => {
+export const searchCommand = async (cmd: string): Promise<QueryResult<LearnableCommand>> => {
     const database: PoolClient = await connection.connect()
     const searchQuery: string = `select * from ${commandTable} where command = $1;`
     const params: string[] = [cmd]
     try {
         return new Promise<QueryResult>((resolve, rejects) => {
-            database.query(searchQuery, params, (err, res) => {
+            database.query<LearnableCommand>(searchQuery, params, (err, res) => {
                 if (err) {
                     log('error: error on Learnit.ts:30:')
                     log(err)
@@ -44,7 +50,7 @@ export const addCommand = async (command: string, answer: string): Promise<numbe
     const database: PoolClient = await connection.connect()
     const addQuery: string = `insert into ${commandTable} values ( $1, $2 );`
     try {
-        let result: QueryResult<any> = await searchCommand(command)
+        let result: QueryResult<LearnableCommand> = await searchCommand(command)
         log(result.rows[0])
         if (result.rowCount === null) result.rowCount = 0
         if (result.rowCount > 0) {
@@ -52,8 +58,8 @@ export const addCommand = async (command: string, answer: string): Promise<numbe
                 return 403 // no permission
             }
             const query: string = `update ${commandTable} set answer = $2 where command = $1;`
-            result = await new Promise<QueryResult>((resolve, rejects) => {
-                database.query(query, [command, answer], (err, res) => {
+            result = await new Promise<QueryResult<LearnableCommand>>((resolve, rejects) => {
+                database.query<LearnableCommand>(query, [command, answer], (err, res) => {
                     if (err) {
                         log('error: error on Learnit.ts:58:')
                         log(err)
@@ -64,8 +70,8 @@ export const addCommand = async (command: string, answer: string): Promise<numbe
             })
         }
         else {
-            result = await new Promise<QueryResult>((resolve, rejects) => {
-                database.query(addQuery, [command, answer], (err, res) => {
+            result = await new Promise<QueryResult<LearnableCommand>>((resolve, rejects) => {
+                database.query<LearnableCommand>(addQuery, [command, answer], (err, res) => {
                     if (err) { rejects(err) }
                     resolve(res)
                 })

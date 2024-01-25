@@ -6,6 +6,13 @@ import { PoolClient, QueryResult } from 'pg'
 
 const userTable: string = 'public.user'
 
+export interface User {
+    id: string,
+    name: string,
+    balance: number,
+    lastvisit: Date
+}
+
 function isSameDate(a: Date, b: Date): boolean {
     return a.getDate() === b.getDate() && a.getDay() === b.getDay() && a.getFullYear() === b.getFullYear()
 }
@@ -39,13 +46,13 @@ function getYesterday(): Date {
  * @returns 쿼리 결과
  * @throws error: 쿼리 오류. 보통 서버가 없거나 파일을 못 찾았거나.
  */
-export const searchUser = async (id: string): Promise<QueryResult<any>> => {
+export const searchUser = async (id: string): Promise<QueryResult<User>> => {
     const database: PoolClient = await connection.connect()
     const searchQuery: string = `select * from ${userTable} where id = $1;`
     const params: string[] = [id]
     try {
-        return new Promise<QueryResult>((resolve, rejects) => {
-            database.query(searchQuery, params, (err, res) => {
+        return new Promise<QueryResult<User>>((resolve, rejects) => {
+            database.query<User>(searchQuery, params, (err, res) => {
                 if (err) {
                     log('error: error on Register.ts:23:')
                     log(err)
@@ -69,7 +76,7 @@ export const addUser = async (id: string, name: string): Promise<number> => {
     const addQuery: string = `insert into ${userTable} values ( $1, $2, 0, $3 );`
     const value: string[] = [id, name, '2000-01-01']
     try {
-        let result: QueryResult = await searchUser(id)
+        let result: QueryResult<User> = await searchUser(id)
         log(result.rows)
         if (result.rowCount === null) {
             return 500
@@ -78,8 +85,8 @@ export const addUser = async (id: string, name: string): Promise<number> => {
             if (result.rows[0].name === name)
                 return 401 // exist
             else {
-                result = await new Promise<QueryResult>((resolve, rejects) => {
-                    database.query(`update ${userTable} set name = $2 where id = $1`, value, (err, res) => {
+                result = await new Promise<QueryResult<User>>((resolve, rejects) => {
+                    database.query<User>(`update ${userTable} set name = $2 where id = $1`, value, (err, res) => {
                         if (err) { rejects(err) }
                         resolve(res)
                     })
@@ -89,8 +96,8 @@ export const addUser = async (id: string, name: string): Promise<number> => {
 
         }
         else {
-            result = await new Promise<QueryResult>((resolve, rejects) => {
-                database.query(addQuery, value, (err, res) => {
+            result = await new Promise<QueryResult<User>>((resolve, rejects) => {
+                database.query<User>(addQuery, value, (err, res) => {
                     if (err) { rejects(err) }
                     resolve(res)
                 })
@@ -113,7 +120,7 @@ export const addMoney = async (id: string, moneyDelta: number, updateDate?: bool
     const database: PoolClient = await connection.connect()
     const addQuery: string = `update ${userTable} set balance = $2${updateDate ? ' , lastvisit = NOW() :: DATE' : ''} where id = $1::varchar`
     //log(addQuery)
-    let result: QueryResult<any>
+    let result: QueryResult<User>
     try {
         result = await searchUser(id)
     }
@@ -127,8 +134,8 @@ export const addMoney = async (id: string, moneyDelta: number, updateDate?: bool
     const value: string[] = [id, (moneyDelta + Number(result.rows[0].balance)) < 0 ? '0' : (moneyDelta + Number(result.rows[0].balance)).toString()]
     //log(value)
     try {
-        result = await new Promise((resolve, rejects) => {
-            database.query(addQuery, value, (err, res) => {
+        result = await new Promise<QueryResult<User>>((resolve, rejects) => {
+            database.query<User>(addQuery, value, (err, res) => {
                 if (err) { rejects(err) }
                 resolve(res)
             })
@@ -176,7 +183,7 @@ class UserRegisterExtension extends Extension {
     async learnIt(i: ChatInputCommandInteraction) {
         if (i.guildId === "604137297033691137" && i.channelId === "858627537994383401") return
         let lastVis: Date
-        let uData: QueryResult<any>
+        let uData: QueryResult<User>
         try {
             uData = await searchUser(i.user.id)
             //log(uData)
