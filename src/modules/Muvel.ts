@@ -8,23 +8,23 @@ const muvelApiNovels: string = `${muvelApi}/novels`
 const muvelApiNovelsTitle: string = `${muvelApiNovels}?title=`
 
 type muvelNovel = {
-    tags: string[];
-    id: string;
-    title: string;
-    description: string;
-    thumbnail: string | '';
-    share: number;
-    createdAt: string;
-    updatedAt: string;
-    author: muvelNovelAuthor;
-    episodeIds: string[];
+    tags: string[]
+    id: string
+    title: string
+    description: string
+    thumbnail: string | ''
+    share: number
+    createdAt: string
+    updatedAt: string
+    author: muvelNovelAuthor
+    episodeIds: string[]
 }
 
 type muvelNovelAuthor = {
-    id: string;
-    username: string;
-    avatar: string;
-    admin: boolean;
+    id: string
+    username: string
+    avatar: string
+    admin: boolean
 }
 
 class MuvelExtension extends Extension {
@@ -56,7 +56,7 @@ class MuvelExtension extends Extension {
         if (!novel) {
             return await i.reply('검색 결과가 없어요.')
         }
-        const embed = new EmbedBuilder()
+        const embed: EmbedBuilder = new EmbedBuilder()
             .setTitle(novel.title)
             .setDescription(novel.description)
             .setURL(`${muvelUrl}/novels/${novel.id}`)

@@ -1,13 +1,13 @@
 import { connection } from '../pgsql'
 import { Extension, applicationCommand, option } from '@pikokr/command.ts'
 import { log } from 'console'
-import { ApplicationCommandType, ChatInputCommandInteraction } from 'discord.js'
+import { ApplicationCommandType, ChatInputCommandInteraction, Snowflake } from 'discord.js'
 import { PoolClient, QueryResult } from 'pg'
 
 const userTable: string = 'public.user'
 
 export interface User {
-    id: string,
+    id: Snowflake,
     name: string,
     balance: number,
     lastvisit: Date
