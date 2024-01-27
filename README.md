@@ -1,33 +1,20 @@
-# Command.TS V5 QuickStart Template
+# My Discord App
+사용한 템플릿: `Command.TS v5 Quick Start Template`
+- [README](./docs/CTStemplate-README.md)
 
-This is a template of discord bot made with [@pikokr/command.ts](https://github.com/pikokr/command.ts) v5 with slash commands.
+※ 이 레포지트리는 키뮤스토리 커뮤니티의 키뮤 코딩 챌린지를 진행하면서 작성되었습니다.
 
-## Creating an App
+## 레포지트리 준비하기
+다음 앱을 설치해주세요:
+- Node.JS
+- PostgreSQL (다른 DB 구현체 이용 시 코드 수정 필요)
 
-You’ll need to have Node 16.9.0 or later version on your local development machine (but it’s not required on the server). We recommend using the latest LTS version. You can use nvm (macOS/Linux) or nvm-windows to switch Node versions between different projects.
-To create a new app, you should use [npx](https://medium.com/@maybekatz/introducing-npx-an-npm-package-runner-55f7d4bd282b).
-
-```shell
-npx degit pikokr/command.ts-v5-template my-app
-cd my-app
-
+시작하기 전에, 다음 명령어를 미리 입력해주세요:
+```sh
 corepack enable
-
-pnpm i
-pnpm dev
+npm i -U npm pnpm npx
+pnpm i pnpm
 ```
+입력하지 않아 발생하는 설치 오류는 책임지지 않습니다.
 
-Runs the app in development mode.
-
-### Install Dependencies
-
-You can install dependencies with `pnpm install`(this template is configured to use only pnpm for package manager). This must be done the first time you create the app.
-
-### Run the bot in development mode.
-
-You can run your bot in development mode with `pnpm dev`
-
-### Build the bot and run for production
-
-If you use `pnpm build` without errors in your code, the build file will appear in `dist` folder.
-You can execute this file with `pnpm start` for your production.
+나머지는 [CTS 템플릿의 README](./docs/CTStemplate-README.md)를 참고해주세요.
