@@ -1,14 +1,14 @@
 import { connection } from '../pgsql'
 import { Extension, applicationCommand, option } from '@pikokr/command.ts'
 import { log } from 'console'
-import { ActionRowBuilder, ApplicationCommandOptionType, ApplicationCommandType, ButtonBuilder, ButtonStyle, ChatInputCommandInteraction, EmbedBuilder, InteractionResponse, Snowflake } from 'discord.js'
-import { User, searchUser } from './Register'
+import { ActionRowBuilder, ApplicationCommandOptionType, ApplicationCommandType, ButtonBuilder, ButtonInteraction, ButtonStyle, ChatInputCommandInteraction, Collector, EmbedBuilder, InteractionCollector, InteractionResponse, MessageComponentInteraction, Snowflake } from 'discord.js'
+import { User, addMoney, searchUser } from './Register'
 import { PoolClient, QueryResult } from 'pg'
 
 type Company = {
     name: string
     owner: Snowflake
-    guild: Snowflake
+    guild: Snowflake | ''
     money: number
 }
 const CompanyTable: string = 'public.company'
@@ -39,7 +39,8 @@ const searchCompany = async (name: string, owner: string): Promise<QueryResult<C
  * @param guild executing guild snowflake
  * @returns 
  */
-const addCompany = async (name: string, owner: string, guild: string, money: number): Promise<number> => {
+const addCompany = async (name: string, owner: string, guild: string | null, money: number): Promise<number> => {
+    if (guild === null) return 500
     const database: PoolClient = await connection.connect()
     const addQuery: string = `insert into ${CompanyTable} values ($1, $2, $3, $4::bigint);`
     const value: string[] = [name, owner, guild, money.toString()]
@@ -62,7 +63,8 @@ const addCompany = async (name: string, owner: string, guild: string, money: num
     return 200
 }
 
-const updateCompanyMoney = async (owner: string, guild: string, money: number): Promise<number> => {
+const updateCompanyMoney = async (owner: string, guild: string | null, money: number): Promise<number> => {
+    if (guild === null) return 500
     const database: PoolClient = await connection.connect()
     const updateQuery: string = `update ${CompanyTable} set money = $3::bigint where owner = $1 and guild = $2`
     const value: string[] = [owner, guild, money.toString()]
@@ -128,6 +130,8 @@ class EconomyExtension extends Extension {
         await i.reply({ embeds: [embed] })
     }
     //*
+
+    // 내부 함수 출처: https://github.com/Aleu0091/kimu-mission-9/blob/main/index.js#L403
     @applicationCommand({
         name: '창업',
         type: ApplicationCommandType.ChatInput,
@@ -150,6 +154,10 @@ class EconomyExtension extends Extension {
         money: number
     ) {
         if (i.guildId === "604137297033691137" && i.channelId === "858627537994383401") return
+        if (i.guildId === null) {
+            return await i.reply('DM에서는 실행할 수 없어요! 서버에서 실행해주세요.')
+        }
+        //*
         let userData: QueryResult<User>
         try {
             userData = await searchUser(i.user.id)
@@ -161,6 +169,11 @@ class EconomyExtension extends Extension {
             return await i.reply("사용자가 등록되지 않았어요! '/등록' 명령어로 등록해주세요!")
         }
         const user: User = userData.rows[0]
+        const _company: QueryResult<Company> = await searchCompany(companyName, user.id)
+        if (_company.rowCount === null) { }
+        else if (_company.rowCount > 0) {
+            return await i.reply('이미 진행중인 투자가 있어요!')
+        }
 
         const startEmbed: EmbedBuilder = new EmbedBuilder()
             .setTitle('투자 시작!')
@@ -169,9 +182,110 @@ class EconomyExtension extends Extension {
             .setCustomId('exitInvest')
             .setLabel('사업 철수')
             .setStyle(ButtonStyle.Danger)
-        const row = new ActionRowBuilder().addComponents(finishBtn)
-        // const respond: InteractionResponse = await i.reply({ embeds: [startEmbed], components: [row] }) // error: no overload matches this call on economy.ts:173:97
-        i.reply('이 명령어는 준비 중이에요!')
+        const row: ActionRowBuilder<ButtonBuilder> = new ActionRowBuilder<ButtonBuilder>()
+            .addComponents(finishBtn)
+        const respond: InteractionResponse = await i.reply({ embeds: [startEmbed], components: [row] })
+        let turn: number = 0
+
+        const investRun = async () => {
+            const _updatemoney = async (money: number): Promise<number> => updateCompanyMoney(user.id, i.guildId, money)
+            const _deletecomp = async (): Promise<number> => deleteCompany(companyName, user.id)
+            let _errorcode: number = await addCompany(companyName, user.id, i.guildId, money)
+            turn++
+            money = Math.floor(money * 0.95)
+
+            const event: number = Math.random() * 100
+            let eventMsg: string
+
+            if (event < 5) {
+                // broke
+                money = 0
+                eventMsg = '파산했습니다! 자산 가치가 0이 되었습니다.'
+                const _tot: number = money
+                _errorcode = await deleteCompany(companyName, user.id)
+
+                const embed: EmbedBuilder = new EmbedBuilder()
+                    .setTitle('파산했습니다!')
+                    .setDescription(`**${companyName}**이(가) 망했습니다.`)
+
+                await i.editReply({ embeds: [embed], components: [] })
+                return false
+            } else if (event < 25) {
+                // 손해
+                const lossPercentage = Math.floor(Math.random() * (30 - 10 + 1) + 10);
+                const lossAmount = Math.floor((money * lossPercentage) / 100);
+                money -= lossAmount;
+                eventMsg = `손해를 봤습니다!\n **${companyName}**의 가치가 ${lossPercentage}% 감소했습니다.`;
+            } else if (event < 30) {
+                // 무난한 순항
+                eventMsg = `무난한 순항입니다.\n **${companyName}**의 가치가 변동이 없습니다.`;
+            } else if (event < 50) {
+                // 좋은 일
+                const gainPercentage = Math.floor(Math.random() * (30 - 10 + 1) + 10);
+                const gainAmount = Math.floor((money * gainPercentage) / 100);
+                money += gainAmount;
+                eventMsg = `좋은 일이 생겼습니다!\n **${companyName}**의 가치가 ${gainPercentage}% 증가했습니다.`;
+            } else if (event < 99.9) {
+                // 대박
+                const jackpotMultiplier = Math.floor(Math.random() * (200 - 100 + 1) + 100);
+                const jackpotAmount = Math.floor((money * jackpotMultiplier) / 100);
+                money += jackpotAmount;
+                eventMsg = `대박이야!\n **${companyName}**의 가치가 ${jackpotMultiplier}% 증가했습니다.`;
+            } else {
+                // 초대박
+                const megaJackpotMultiplier = 500;
+                const megaJackpotAmount = Math.floor((money * megaJackpotMultiplier) / 100);
+                money += megaJackpotAmount;
+                eventMsg = `초대박이야!\n **${companyName}**의 가치가 ${megaJackpotMultiplier}% 증가했습니다.`;
+            }
+            const embed: EmbedBuilder = new EmbedBuilder()
+                .setTitle(`턴 ${turn}`)
+            const collectorFilter = (j: MessageComponentInteraction) => j.user.id === i.user.id
+            try {
+                const respond = await i.editReply({
+                    embeds: [embed],
+                    components: [row]
+                })
+            } catch (e) {
+                console.log(e)
+            }
+            try {
+                const _confirm = await respond.awaitMessageComponent({
+                    filter: collectorFilter,
+                    time: 5_000
+                })
+
+                if (_confirm.customId === 'exitInvest') {
+                    const earnt: number = money
+                    await deleteCompany(companyName, user.id)
+                    const embed: EmbedBuilder = new EmbedBuilder()
+                        .setTitle('사업 철수!')
+                        .setDescription(`**${companyName}**에서 ${money} 코인을 얻었습니다.`)
+                    addMoney(user.id, money)
+                    const finishBtn: ButtonBuilder = new ButtonBuilder()
+                        .setCustomId('exitInvest')
+                        .setLabel('사업 철수')
+                        .setStyle(ButtonStyle.Danger)
+                        .setDisabled(true)
+                    const row: ActionRowBuilder<ButtonBuilder> = new ActionRowBuilder<ButtonBuilder>()
+                        .addComponents(finishBtn)
+
+                    try {
+                        const respond = await i.editReply({
+                            embeds: [embed],
+                            components: [row]
+                        })
+                    } catch (e) { console.log(e) }
+                    await _confirm.update({ components: [] })
+                }
+            } catch (err) {
+                setTimeout(
+                    () => investRun(), 0
+                )
+            }
+        }
+        //*/
+        investRun()
     }
     //*/
 }
