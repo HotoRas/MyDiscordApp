@@ -11,7 +11,7 @@ type Company = {
     guild: Snowflake | ''
     money: number
 }
-const CompanyTable: string = 'public.company'
+const CompanyTable: string = 'public.companies'
 
 const searchCompany = async (name: string, owner: string): Promise<QueryResult<Company>> => {
     const database: PoolClient = await connection.connect()
@@ -135,7 +135,7 @@ class EconomyExtension extends Extension {
     @applicationCommand({
         name: '창업',
         type: ApplicationCommandType.ChatInput,
-        description: '돈 벌기 게임을 시작해봐요!',
+        description: '돈 벌기 게임을 시작해봐요! 경고: 10코인 미만으로 떨어지면 파산이에요!',
     })
     async makeCompany(i: ChatInputCommandInteraction,
         @option({
@@ -157,6 +157,9 @@ class EconomyExtension extends Extension {
         if (i.guildId === null) {
             return await i.reply('DM에서는 실행할 수 없어요! 서버에서 실행해주세요.')
         }
+        if (money <= 30) {
+            return await i.reply('돈은 30코인 미만으로 설정할 수 없어요! 30코인 이상으로 설정해주세요.')
+        }
         //*
         let userData: QueryResult<User>
         try {
@@ -171,9 +174,7 @@ class EconomyExtension extends Extension {
         const user: User = userData.rows[0]
         const _company: QueryResult<Company> = await searchCompany(companyName, user.id)
         if (_company.rowCount === null) { }
-        else if (_company.rowCount > 0) {
-            return await i.reply('이미 진행중인 투자가 있어요!')
-        }
+        else if (_company.rowCount > 0) { return await i.reply('이미 진행중인 투자가 있어요!') }
 
         const startEmbed: EmbedBuilder = new EmbedBuilder()
             .setTitle('투자 시작!')
@@ -197,12 +198,12 @@ class EconomyExtension extends Extension {
             const event: number = Math.random() * 100
             let eventMsg: string
 
-            if (event < 5) {
+            if (event < 5 || money <= 10) {
                 // broke
                 money = 0
                 eventMsg = '파산했습니다! 자산 가치가 0이 되었습니다.'
                 const _tot: number = money
-                _errorcode = await deleteCompany(companyName, user.id)
+                _errorcode = await _deletecomp()
 
                 const embed: EmbedBuilder = new EmbedBuilder()
                     .setTitle('파산했습니다!')
@@ -212,8 +213,8 @@ class EconomyExtension extends Extension {
                 return false
             } else if (event < 25) {
                 // 손해
-                const lossPercentage = Math.floor(Math.random() * (30 - 10 + 1) + 10);
-                const lossAmount = Math.floor((money * lossPercentage) / 100);
+                const lossPercentage: number = Math.floor(Math.random() * (30 - 10 + 1) + 10);
+                const lossAmount: number = Math.floor((money * lossPercentage) / 100);
                 money -= lossAmount;
                 eventMsg = `손해를 봤습니다!\n **${companyName}**의 가치가 ${lossPercentage}% 감소했습니다.`;
             } else if (event < 30) {
@@ -221,47 +222,48 @@ class EconomyExtension extends Extension {
                 eventMsg = `무난한 순항입니다.\n **${companyName}**의 가치가 변동이 없습니다.`;
             } else if (event < 50) {
                 // 좋은 일
-                const gainPercentage = Math.floor(Math.random() * (30 - 10 + 1) + 10);
-                const gainAmount = Math.floor((money * gainPercentage) / 100);
+                const gainPercentage: number = Math.floor(Math.random() * (30 - 10 + 1) + 10);
+                const gainAmount: number = Math.floor((money * gainPercentage) / 100);
                 money += gainAmount;
                 eventMsg = `좋은 일이 생겼습니다!\n **${companyName}**의 가치가 ${gainPercentage}% 증가했습니다.`;
             } else if (event < 99.9) {
                 // 대박
-                const jackpotMultiplier = Math.floor(Math.random() * (200 - 100 + 1) + 100);
-                const jackpotAmount = Math.floor((money * jackpotMultiplier) / 100);
+                const jackpotMultiplier: number = Math.floor(Math.random() * (200 - 100 + 1) + 100);
+                const jackpotAmount: number = Math.floor((money * jackpotMultiplier) / 100);
                 money += jackpotAmount;
                 eventMsg = `대박이야!\n **${companyName}**의 가치가 ${jackpotMultiplier}% 증가했습니다.`;
             } else {
                 // 초대박
-                const megaJackpotMultiplier = 500;
-                const megaJackpotAmount = Math.floor((money * megaJackpotMultiplier) / 100);
+                const megaJackpotMultiplier: number = 500;
+                const megaJackpotAmount: number = Math.floor((money * megaJackpotMultiplier) / 100);
                 money += megaJackpotAmount;
                 eventMsg = `초대박이야!\n **${companyName}**의 가치가 ${megaJackpotMultiplier}% 증가했습니다.`;
             }
             const embed: EmbedBuilder = new EmbedBuilder()
                 .setTitle(`턴 ${turn}`)
-            const collectorFilter = (j: MessageComponentInteraction) => j.user.id === i.user.id
-            try {
-                const respond = await i.editReply({
-                    embeds: [embed],
-                    components: [row]
+                .setDescription(eventMsg + `\n현재 가치: ${money}`)
+                .setFooter({
+                    text: '※ 수수료 5%가 자동 납부되었습니다.'
                 })
+            const collectorFilter = (j: MessageComponentInteraction): boolean => j.user.id === i.user.id
+            try {
+                await i.editReply({ embeds: [embed], components: [row] })
             } catch (e) {
                 console.log(e)
             }
+            await _updatemoney(money)
             try {
                 const _confirm = await respond.awaitMessageComponent({
-                    filter: collectorFilter,
-                    time: 5_000
+                    filter: collectorFilter, time: 5_000
                 })
 
                 if (_confirm.customId === 'exitInvest') {
                     const earnt: number = money
-                    await deleteCompany(companyName, user.id)
+                    await _deletecomp()
                     const embed: EmbedBuilder = new EmbedBuilder()
                         .setTitle('사업 철수!')
-                        .setDescription(`**${companyName}**에서 ${money} 코인을 얻었습니다.`)
-                    addMoney(user.id, money)
+                        .setDescription(`**${companyName}**에서 ${earnt} 코인을 얻었습니다.`)
+                    addMoney(user.id, earnt)
                     const finishBtn: ButtonBuilder = new ButtonBuilder()
                         .setCustomId('exitInvest')
                         .setLabel('사업 철수')
@@ -271,23 +273,16 @@ class EconomyExtension extends Extension {
                         .addComponents(finishBtn)
 
                     try {
-                        const respond = await i.editReply({
-                            embeds: [embed],
-                            components: [row]
-                        })
+                        await i.editReply({ embeds: [embed], components: [row] })
                     } catch (e) { console.log(e) }
                     await _confirm.update({ components: [] })
                 }
             } catch (err) {
-                setTimeout(
-                    () => investRun(), 0
-                )
+                setTimeout(() => investRun(), 0)
             }
         }
-        //*/
         investRun()
     }
-    //*/
 }
 
 export const setup = async () => {
