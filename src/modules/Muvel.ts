@@ -1,6 +1,7 @@
 import axios, { AxiosResponse } from 'axios'
 import { Extension, applicationCommand, option } from '@pikokr/command.ts'
 import { ApplicationCommandOptionType, ApplicationCommandType, ChatInputCommandInteraction, EmbedBuilder } from 'discord.js'
+import { checkKimustoryCommunityLounge } from './Hello'
 
 const muvelUrl: string = 'https://muvel.kimustory.net'
 const muvelApi: string = `${muvelUrl}/api`
@@ -43,7 +44,7 @@ class MuvelExtension extends Extension {
         })
         title: string
     ) {
-        if (i.guildId === "604137297033691137" && i.channelId === "858627537994383401") return
+        if (checkKimustoryCommunityLounge(i)) return
         const url: string = (title) ? `${muvelApiNovelsTitle}${title}` : muvelApiNovels
         let novel: muvelNovel
         try {

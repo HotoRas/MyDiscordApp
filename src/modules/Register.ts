@@ -153,7 +153,7 @@ class UserRegisterExtension extends Extension {
         description: '여러분의 이름을 알려주세요! (경제 시스템을 이용하려면 필요합니다)'
     })
     async register(i: ChatInputCommandInteraction) {
-        if (i.guildId === "604137297033691137" && i.channelId === "858627537994383401") return
+        //if (i.guildId === "604137297033691137" && i.channelId === "858627537994383401") return
         let returned: number = 0
         const uid = i.user.id
         const uname = i.user.username.endsWith('#0') ? i.user.username.slice(0, -2) : i.user.username
@@ -180,7 +180,7 @@ class UserRegisterExtension extends Extension {
         type: ApplicationCommandType.ChatInput,
         description: '출석체크! 100 코인을 받아요!'
     })
-    async learnIt(i: ChatInputCommandInteraction) {
+    async daily(i: ChatInputCommandInteraction) {
         if (i.guildId === "604137297033691137" && i.channelId === "858627537994383401") return
         let lastVis: Date
         let uData: QueryResult<User>

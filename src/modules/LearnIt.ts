@@ -106,7 +106,7 @@ class LearnitExtension extends Extension {
         })
         answer: string
     ) {
-        if (i.guildId === "604137297033691137" && i.channelId === "858627537994383401") return
+        // if (i.guildId === "604137297033691137" && i.channelId === "858627537994383401") return
         let returned: number = 0
         try {
             returned = await addCommand(question, answer)

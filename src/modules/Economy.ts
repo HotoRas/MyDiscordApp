@@ -4,6 +4,7 @@ import { log } from 'console'
 import { ActionRowBuilder, ApplicationCommandOptionType, ApplicationCommandType, ButtonBuilder, ButtonInteraction, ButtonStyle, ChatInputCommandInteraction, Collector, EmbedBuilder, InteractionCollector, InteractionResponse, MessageComponentInteraction, Snowflake } from 'discord.js'
 import { User, addMoney, searchUser } from './Register'
 import { PoolClient, QueryResult } from 'pg'
+import { checkKimustoryCommunityLounge } from './Hello'
 
 type Company = {
     name: string
@@ -107,7 +108,7 @@ class EconomyExtension extends Extension {
         description: '지금 돈을 보여드려요',
     })
     async myMoney(i: ChatInputCommandInteraction) {
-        if (i.guildId === "604137297033691137" && i.channelId === "858627537994383401") return
+        //if (i.guildId === "604137297033691137" && i.channelId === "858627537994383401") return
 
         let user: QueryResult<User>
         try {
@@ -153,7 +154,7 @@ class EconomyExtension extends Extension {
         })
         money: number
     ) {
-        if (i.guildId === "604137297033691137" && i.channelId === "858627537994383401") return
+        if (checkKimustoryCommunityLounge(i)) return
         if (i.guildId === null) {
             return await i.reply('DM에서는 실행할 수 없어요! 서버에서 실행해주세요.')
         }

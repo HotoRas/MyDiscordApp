@@ -4,6 +4,10 @@ import { ApplicationCommandType, ChatInputCommandInteraction, Message, Permissio
 import { log } from 'console'
 import { QueryResult } from 'pg'
 
+export function checkKimustoryCommunityLounge(m: Message | ChatInputCommandInteraction): boolean {
+  return m.guildId === "604137297033691137" && m.channelId === "858627537994383401"
+}
+
 class HelloExtension extends Extension {
   @listener({ event: 'ready' })
   async ready() {
@@ -31,7 +35,7 @@ class HelloExtension extends Extension {
     description: '안녕하세요',
   })
   async hello(i: ChatInputCommandInteraction) {
-    if (i.guildId === "604137297033691137" && i.channelId === "858627537994383401") return
+    if (checkKimustoryCommunityLounge(i)) return
     await i.reply(`안녕하세요, ${i.user.username}님!`)
   }
 
@@ -53,7 +57,7 @@ class HelloExtension extends Extension {
     emitter: 'discord'
   })
   async heyRas(msg: Message) {
-    if (msg.guildId === "604137297033691137" && msg.channelId === "858627537994383401") return
+    //if (msg.guildId === "604137297033691137" && msg.channelId === "858627537994383401") return
     if (msg.author.bot) return
     if (!msg.content.startsWith('라즈야 ')) return
 
