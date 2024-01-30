@@ -1,9 +1,19 @@
 import { config } from './config'
 import { CustomizedCommandClient } from './structures'
-import { Client, GatewayIntentBits } from 'discord.js'
+import { ActivityType, Client, GatewayIntentBits } from 'discord.js'
 
 const client = new Client({
   intents: ['Guilds', 'DirectMessages', 'GuildMessages', 'MessageContent'],
+  presence: {
+    afk: false,
+    status: 'online',
+    activities: [
+      {
+        name: "'라즈야'로 불러보세요!",
+        type: ActivityType.Playing
+      }
+    ]
+  }
 })
 
 const cts = new CustomizedCommandClient(client)
