@@ -1,7 +1,7 @@
 import { connection } from '../pgsql'
 import { Extension, applicationCommand, option } from '@pikokr/command.ts'
 import { log } from 'console'
-import { ApplicationCommandOptionType, ApplicationCommandType, ChatInputCommandInteraction } from 'discord.js'
+import { ApplicationCommandOptionType, ApplicationCommandType, ChatInputCommandInteraction, Snowflake } from 'discord.js'
 import { PoolClient, QueryResult } from 'pg'
 
 const commandTable: string = 'public.command'
@@ -9,7 +9,8 @@ const commandTable: string = 'public.command'
 export interface LearnableCommand {
     command: string,
     answer: string,
-    editable: boolean
+    editable: boolean,
+    learnfrom: Snowflake
 }
 
 /**
@@ -46,20 +47,19 @@ export const searchCommand = async (cmd: string): Promise<QueryResult<LearnableC
  * @param answer 추가할 대답
  * @returns 200: 성공; 500: 오류; 403: 수정할 수 없음
  */
-export const addCommand = async (command: string, answer: string): Promise<number> => {
+export const addCommand = async (command: string, answer: string, teacher: Snowflake): Promise<number> => {
     const database: PoolClient = await connection.connect()
-    const addQuery: string = `insert into ${commandTable} values ( $1, $2 );`
+    const addQuery: string = `insert into ${commandTable} values ( $1, $2, true, $3 );`
     try {
         let result: QueryResult<LearnableCommand> = await searchCommand(command)
-        log(result.rows[0])
         if (result.rowCount === null) result.rowCount = 0
         if (result.rowCount > 0) {
             if (!result.rows[0].editable) {
                 return 403 // no permission
             }
-            const query: string = `update ${commandTable} set answer = $2 where command = $1;`
+            const query: string = `update ${commandTable} set answer = $2 , learnfrom = $3 where command = $1;`
             result = await new Promise<QueryResult<LearnableCommand>>((resolve, rejects) => {
-                database.query<LearnableCommand>(query, [command, answer], (err, res) => {
+                database.query<LearnableCommand>(query, [command, answer, teacher], (err, res) => {
                     if (err) {
                         log('error: error on Learnit.ts:58:')
                         log(err)
@@ -71,7 +71,7 @@ export const addCommand = async (command: string, answer: string): Promise<numbe
         }
         else {
             result = await new Promise<QueryResult<LearnableCommand>>((resolve, rejects) => {
-                database.query<LearnableCommand>(addQuery, [command, answer], (err, res) => {
+                database.query<LearnableCommand>(addQuery, [command, answer, teacher], (err, res) => {
                     if (err) { rejects(err) }
                     resolve(res)
                 })
@@ -109,7 +109,7 @@ class LearnitExtension extends Extension {
         // if (i.guildId === "604137297033691137" && i.channelId === "858627537994383401") return
         let returned: number = 0
         try {
-            returned = await addCommand(question, answer)
+            returned = await addCommand(question, answer, i.user.id)
         } catch {
             return await i.reply('명령어 추가에 실패했어요...\n데이터를 저장하는 중 문제가 발생했어요. 봇 관리자에 문의해주세요!')
         }
@@ -125,6 +125,4 @@ class LearnitExtension extends Extension {
     }
 }
 
-export const setup = async () => {
-    return new LearnitExtension()
-}
+export const setup = async () => { return new LearnitExtension() }

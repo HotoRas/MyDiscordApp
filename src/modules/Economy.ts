@@ -1,8 +1,8 @@
 import { connection } from '../pgsql'
 import { Extension, applicationCommand, option } from '@pikokr/command.ts'
 import { log } from 'console'
-import { ActionRowBuilder, ApplicationCommandOptionType, ApplicationCommandType, ButtonBuilder, ButtonInteraction, ButtonStyle, ChatInputCommandInteraction, Collector, EmbedBuilder, InteractionCollector, InteractionResponse, MessageComponentInteraction, Snowflake } from 'discord.js'
-import { User, addMoney, searchUser } from './Register'
+import { ActionRowBuilder, ApplicationCommandOptionType, ApplicationCommandType, ButtonBuilder, ButtonStyle, ChatInputCommandInteraction, EmbedBuilder, InteractionResponse, MessageComponentInteraction, Snowflake } from 'discord.js'
+import { tUser, addMoney, searchUser } from './Register'
 import { PoolClient, QueryResult } from 'pg'
 import { checkKimustoryCommunityLounge } from './Hello'
 
@@ -110,7 +110,7 @@ class EconomyExtension extends Extension {
     async myMoney(i: ChatInputCommandInteraction) {
         //if (i.guildId === "604137297033691137" && i.channelId === "858627537994383401") return
 
-        let user: QueryResult<User>
+        let user: QueryResult<tUser>
         try {
             user = await searchUser(i.user.id)
         }
@@ -121,7 +121,7 @@ class EconomyExtension extends Extension {
             return await i.reply("사용자가 등록되지 않았어요! '/등록' 명령어로 등록해주세요!")
         }
 
-        const userData: User = user.rows[0]
+        const userData: tUser = user.rows[0]
         const embed: EmbedBuilder = new EmbedBuilder()
             .setTitle(userData.name)
             .addFields(
@@ -162,7 +162,7 @@ class EconomyExtension extends Extension {
             return await i.reply('돈은 30코인 미만으로 설정할 수 없어요! 30코인 이상으로 설정해주세요.')
         }
         //*
-        let userData: QueryResult<User>
+        let userData: QueryResult<tUser>
         try {
             userData = await searchUser(i.user.id)
         }
@@ -172,7 +172,7 @@ class EconomyExtension extends Extension {
         if (userData.rowCount === 0) {
             return await i.reply("사용자가 등록되지 않았어요! '/등록' 명령어로 등록해주세요!")
         }
-        const user: User = userData.rows[0]
+        const user: tUser = userData.rows[0]
         const _company: QueryResult<Company> = await searchCompany(companyName, user.id)
         if (_company.rowCount === null) { }
         else if (_company.rowCount > 0) { return await i.reply('이미 진행중인 투자가 있어요!') }
@@ -286,6 +286,4 @@ class EconomyExtension extends Extension {
     }
 }
 
-export const setup = async () => {
-    return new EconomyExtension()
-}
+export const setup = async () => { return new EconomyExtension() }

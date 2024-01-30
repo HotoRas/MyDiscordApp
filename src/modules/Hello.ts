@@ -3,6 +3,7 @@ import { Extension, applicationCommand, listener, ownerOnly } from '@pikokr/comm
 import { ApplicationCommandType, ChatInputCommandInteraction, Message, PermissionFlagsBits } from 'discord.js'
 import { log } from 'console'
 import { QueryResult } from 'pg'
+import { searchUser, tUser } from './Register'
 
 export function checkKimustoryCommunityLounge(m: Message | ChatInputCommandInteraction): boolean {
   return m.guildId === "604137297033691137" && m.channelId === "858627537994383401"
@@ -67,11 +68,13 @@ class HelloExtension extends Extension {
     if (query.rowCount === 0 || query.rowCount === null) {
       return await msg.reply('미안, 뭔 말인지 모르겠어..')
     }
+    const result: LearnableCommand = query.rows[0]
+    log(`Command found: ${result.command} --> ${result.answer}; editable: ${result.editable}; from: ${result.learnfrom}`)
     const answer: string = query.rows[0].answer
-    await msg.reply(answer)
+    const getUser: QueryResult<tUser> = await searchUser(result.learnfrom)
+    const learnfrom: string = '\n`' + getUser.rowCount ? getUser.rows[0].name : result.learnfrom + ' 님이 가르쳐 주셨어요!`'
+    await msg.reply(answer/* + learnfrom*/)
   }
 }
 
-export const setup = async () => {
-  return new HelloExtension()
-}
+export const setup = async () => { return new HelloExtension() }

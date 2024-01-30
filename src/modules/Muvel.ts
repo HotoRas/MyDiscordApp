@@ -78,6 +78,4 @@ class MuvelExtension extends Extension {
     }
 }
 
-export const setup = async () => {
-    return new MuvelExtension()
-}
+export const setup = async () => { return new MuvelExtension() }
