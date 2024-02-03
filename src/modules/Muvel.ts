@@ -2,31 +2,12 @@ import axios, { AxiosResponse } from 'axios'
 import { Extension, applicationCommand, option } from '@pikokr/command.ts'
 import { ApplicationCommandOptionType, ApplicationCommandType, ChatInputCommandInteraction, EmbedBuilder } from 'discord.js'
 import { checkKimustoryCommunityLounge } from './Hello'
+import { muvelNovel } from '../interfaces/MuvelNovel'
 
 const muvelUrl: string = 'https://muvel.kimustory.net'
 const muvelApi: string = `${muvelUrl}/api`
 const muvelApiNovels: string = `${muvelApi}/novels`
 const muvelApiNovelsTitle: string = `${muvelApiNovels}?title=`
-
-type muvelNovel = {
-    tags: string[]
-    id: string
-    title: string
-    description: string
-    thumbnail: string | ''
-    share: number
-    createdAt: string
-    updatedAt: string
-    author: muvelNovelAuthor
-    episodeIds: string[]
-}
-
-type muvelNovelAuthor = {
-    id: string
-    username: string
-    avatar: string
-    admin: boolean
-}
 
 class MuvelExtension extends Extension {
     @applicationCommand({
