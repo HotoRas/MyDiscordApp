@@ -1,6 +1,6 @@
 import { config } from './config'
 import { CustomizedCommandClient } from './structures'
-import { ActivityType, ApplicationCommand, Client, GatewayIntentBits, Routes } from 'discord.js'
+import { ActivityType, ApplicationCommand, Client } from 'discord.js'
 
 const client = new Client({
   intents: ['Guilds', 'DirectMessages', 'GuildMessages', 'MessageContent'],
@@ -24,15 +24,6 @@ const start = async () => {
   await client.login(config.token)
 
   await cts.getApplicationCommandsExtension()?.sync()
-  /*
-  config.guilds.map(async gid => {
-    await client.rest.put(
-      Routes.applicationGuildCommands('1060523437661106316', gid), { body: [] }
-    )
-      .then(() => console.log(`Deleted all commands from guild ${gid}`))
-      .catch(console.error)
-  })
-  //*/
 }
 
 start().then()
