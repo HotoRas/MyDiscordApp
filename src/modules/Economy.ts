@@ -1,10 +1,8 @@
-import { pgConnection } from '../pgsql'
 import { Extension, applicationCommand, option } from '@pikokr/command.ts'
-import { log } from 'console'
-import { ActionRowBuilder, ApplicationCommandOptionType, ApplicationCommandType, ButtonBuilder, ButtonStyle, ChatInputCommandInteraction, EmbedBuilder, InteractionResponse, MessageComponentInteraction, Snowflake } from 'discord.js'
+import { ActionRowBuilder, ApplicationCommandOptionType, ApplicationCommandType, ButtonBuilder, ButtonStyle, ChatInputCommandInteraction, EmbedBuilder, InteractionResponse, MessageComponentInteraction } from 'discord.js'
 import { RasBotUser } from '../interfaces/RasbotUser'
 import { searchUser, addMoney } from '../services/database/user'
-import { PoolClient, QueryResult } from 'pg'
+import { QueryResult } from 'pg'
 import { checkKimustoryCommunityLounge } from './Hello'
 import { InvestEvent, InvestEventChance, InvestEventResult } from '../services/database/economy'
 import { addCompany, deleteCompany, searchCompany, updateCompanyMoney } from '../services/database/economy'
@@ -12,9 +10,11 @@ import { RasbotCompany } from '../interfaces/Company'
 
 class EconomyExtension extends Extension {
     @applicationCommand({
-        name: '내돈',
+        name: 'myMoney',
+        nameLocalizations: { ko: '내돈' },
         type: ApplicationCommandType.ChatInput,
-        description: '지금 돈을 보여드려요',
+        description: 'Shows your money you have now',
+        descriptionLocalizations: { ko: '지금 가지고 있는 돈을 보여드려요' }
     })
     async myMoney(i: ChatInputCommandInteraction) {
         //if (i.guildId === "604137297033691137" && i.channelId === "858627537994383401") return
@@ -43,22 +43,30 @@ class EconomyExtension extends Extension {
 
     // 내부 함수 출처: https://github.com/Aleu0091/kimu-mission-9/blob/main/index.js#L403
     @applicationCommand({
-        name: '창업',
+        name: 'invest',
+        nameLocalizations: { ko: '창업', },
         type: ApplicationCommandType.ChatInput,
-        description: '돈 벌기 게임을 시작해봐요! 경고: 10코인 미만으로 떨어지면 파산이에요!',
+        description: "Begin investigation game. Warning: you're broke when it's below 10 coins!",
+        descriptionLocalizations: {
+            ko: '돈 벌기 게임을 시작해봐요! 경고: 10코인 미만으로 떨어지면 파산이에요!',
+        }
     })
     async makeCompany(i: ChatInputCommandInteraction,
         @option({
             type: ApplicationCommandOptionType.String,
-            name: '회사이름',
-            description: '회사 이름을 정해주세요!',
+            name: 'company-name',
+            name_localizations: { ko: '회사 이름' },
+            description: "Please set the company's name!",
+            description_localizations: { ko: '회사 이름을 정해주세요!' },
             required: true
         })
         companyName: string,
         @option({
             type: ApplicationCommandOptionType.Integer,
-            name: '돈',
-            description: '투입할 돈을 정해주세요!',
+            name: 'money',
+            name_localizations: { ko: '돈' },
+            description: "Please set the money you're to investigate",
+            description_localizations: { ko: '투입할 돈을 정해주세요!' },
             required: true
         })
         money: number

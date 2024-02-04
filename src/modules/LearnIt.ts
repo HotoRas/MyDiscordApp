@@ -4,23 +4,31 @@ import { addCommand } from '../services/database/command'
 
 class LearnitExtension extends Extension {
     @applicationCommand({
-        name: '배워',
+        name: 'learn',
+        nameLocalizations: { ko: '배워' },
         type: ApplicationCommandType.ChatInput,
-        description: '라즈한테 이것저것 가르쳐줘봐요!'
+        description: 'Teach something to Ras!',
+        descriptionLocalizations: { ko: '라즈한테 이것저것 가르쳐줘봐요!' }
     })
     async learnIt(
         i: ChatInputCommandInteraction,
         @option({
             type: ApplicationCommandOptionType.String,
-            name: '명령어',
-            description: "이걸 '라즈야'로 물어보면 답해줄 거에요!",
+            name: 'command',
+            name_localizations: { ko: '명령어' },
+            description: "Ask this with '라즈야' then I'll answer!",
+            description_localizations: { ko: "이걸 '라즈야'로 물어보면 답해줄 거에요!" },
             required: true
         })
         question: string,
         @option({
             type: ApplicationCommandOptionType.String,
-            name: '대답',
-            description: '라즈가 할 대답이에요!',
+            name: 'answer',
+            name_localizations: {
+                ko: '대답'
+            },
+            description: 'The answer Ras will do!',
+            description_localizations: { ko: '라즈가 할 대답이에요!' },
             required: true
         })
         answer: string

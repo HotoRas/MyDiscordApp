@@ -33,27 +33,20 @@ class HelloExtension extends Extension {
   }
 
   @applicationCommand({
-    name: '안녕',
+    name: 'hello',
+    nameLocalizations: {
+      ko: '안녕'
+    },
     type: ApplicationCommandType.ChatInput,
-    description: '안녕하세요',
+    description: 'Hello, world!',
+    descriptionLocalizations: {
+      ko: '안녕하세요!'
+    }
   })
   async hello(i: ChatInputCommandInteraction) {
     if (checkKimustoryCommunityLounge(i)) return
     await i.reply(`안녕하세요, ${i.user.username}님!`)
   }
-
-  /*
-  @applicationCommand({
-    name: 'kill',
-    type: ApplicationCommandType.ChatInput,
-    description: '라즈봇을 완전히 종료해요'
-  })
-  @ownerOnly
-  async kill(i: ChatInputCommandInteraction) {
-    await i.reply('종료할게요. 다시 실행하려면 봇 관리자에게 문의해주세요.')
-    throw new Error()
-  }
-  */
 
   @listener({
     event: 'messageCreate',

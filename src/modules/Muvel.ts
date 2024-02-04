@@ -3,6 +3,7 @@ import { Extension, applicationCommand, option } from '@pikokr/command.ts'
 import { ApplicationCommandOptionType, ApplicationCommandType, ChatInputCommandInteraction, EmbedBuilder } from 'discord.js'
 import { checkKimustoryCommunityLounge } from './Hello'
 import { muvelNovel } from '../interfaces/MuvelNovel'
+import { TrimUserId } from '../services/TrimUsername'
 
 const muvelUrl: string = 'https://muvel.kimustory.net'
 const muvelApi: string = `${muvelUrl}/api`
@@ -11,16 +12,20 @@ const muvelApiNovelsTitle: string = `${muvelApiNovels}?title=`
 
 class MuvelExtension extends Extension {
     @applicationCommand({
-        name: '뮤블검색',
+        name: 'muvelSearch',
+        nameLocalizations: { ko: '뮤블검색' },
         type: ApplicationCommandType.ChatInput,
-        description: '뮤블에 올라와 있는 소설의 검색 결과를 받아서 알려줘요'
+        description: 'Tell you the search result from Muvel',
+        descriptionLocalizations: { ko: '뮤블에 올라와 있는 소설의 검색 결과를 받아서 알려줘요' }
     })
     async muvelSearch(
         i: ChatInputCommandInteraction,
         @option({
             type: ApplicationCommandOptionType.String,
-            name: '제목',
-            description: '소설의 제목을 입력해주세요!',
+            name: 'Title',
+            name_localizations: { ko: '제목' },
+            description: "Please enter the title you're to search!",
+            description_localizations: { ko: '소설의 제목을 입력해주세요!' },
             required: false,
         })
         title: string
@@ -42,7 +47,7 @@ class MuvelExtension extends Extension {
             .setTitle(novel.title)
             .setDescription(novel.description)
             .setURL(`${muvelUrl}/novels/${novel.id}`)
-            .setAuthor({ name: `${novel.author.username.endsWith('#0') ? novel.author.username.slice(0, -2) : novel.author.username} (${novel.author.id})`, iconURL: novel.author.avatar })
+            .setAuthor({ name: `${TrimUserId(novel.author.username)} (${novel.author.id})`, iconURL: novel.author.avatar })
             .setThumbnail(novel.thumbnail)
             .addFields(
                 { name: '생성 시각', value: novel.createdAt },

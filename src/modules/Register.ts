@@ -4,18 +4,23 @@ import { QueryResult } from 'pg'
 import { isSameDate, getYesterday } from '../services/date/DateService'
 import { RasBotUser } from '../interfaces/RasbotUser'
 import { addUser, searchUser, addMoney } from '../services/database/user'
+import { TrimUserId } from '../services/TrimUsername'
 
 class UserRegisterExtension extends Extension {
     @applicationCommand({
-        name: '등록',
+        name: 'register',
+        nameLocalizations: { ko: '등록' },
         type: ApplicationCommandType.ChatInput,
-        description: '여러분의 이름을 알려주세요! (경제 시스템을 이용하려면 필요합니다)'
+        description: 'Please tell me your name!',
+        descriptionLocalizations: {
+            ko: '여러분의 이름을 알려주세요! (경제 시스템을 이용하려면 필요합니다)'
+        }
     })
     async register(i: ChatInputCommandInteraction) {
         //if (i.guildId === "604137297033691137" && i.channelId === "858627537994383401") return
         let result: number = 0
         const uid = i.user.id
-        const uname = i.user.username.endsWith('#0') ? i.user.username.slice(0, -2) : i.user.username
+        const uname = TrimUserId(i.user.username)
         try {
             result = await addUser(uid, uname)
         } catch {
@@ -35,9 +40,13 @@ class UserRegisterExtension extends Extension {
         }
     }
     @applicationCommand({
-        name: '출석',
+        name: 'visit',
+        nameLocalizations: {
+            ko: '출석'
+        },
         type: ApplicationCommandType.ChatInput,
-        description: '출석체크! 100 코인을 받아요!'
+        description: "Check your daily visit. You'll get 100 coins!",
+        descriptionLocalizations: { ko: '출석체크! 100 코인을 받아요!' }
     })
     async daily(i: ChatInputCommandInteraction) {
         if (i.guildId === "604137297033691137" && i.channelId === "858627537994383401") return
