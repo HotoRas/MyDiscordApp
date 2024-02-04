@@ -1,4 +1,4 @@
-import { connection } from '../pgsql'
+import { pgConnection } from '../pgsql'
 import { Extension, applicationCommand, option } from '@pikokr/command.ts'
 import { log } from 'console'
 import { ActionRowBuilder, ApplicationCommandOptionType, ApplicationCommandType, ButtonBuilder, ButtonStyle, ChatInputCommandInteraction, EmbedBuilder, InteractionResponse, MessageComponentInteraction, Snowflake } from 'discord.js'

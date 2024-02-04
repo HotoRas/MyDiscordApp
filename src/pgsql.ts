@@ -1,7 +1,7 @@
 import { Pool } from "pg"
 import { sqlConfig } from "./config"
 
-export const connection = new Pool({
+export const pgConnection = new Pool({
     user: sqlConfig.user,
     host: sqlConfig.host,
     database: sqlConfig.database,

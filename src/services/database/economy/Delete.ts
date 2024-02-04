@@ -1,11 +1,11 @@
-import { connection } from '../../../pgsql'
+import { pgConnection } from '../../../pgsql'
 import { log } from 'console'
 import { PoolClient, QueryResult } from 'pg'
 import { RasbotCompany } from '../../../interfaces/Company'
 import { CompanyTable } from './Default'
 
 export const deleteCompany = async (name: string, owner: string): Promise<number> => {
-    const database: PoolClient = await connection.connect()
+    const database: PoolClient = await pgConnection.connect()
     const updateQuery: string = `delete from ${CompanyTable} where name = $1 and owner = $2;`
     const value: string[] = [name, owner]
     try {

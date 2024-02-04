@@ -1,4 +1,4 @@
-import { connection } from '../pgsql'
+import { pgConnection } from '../../../pgsql'
 import { log } from 'console'
 import { PoolClient, QueryResult } from 'pg'
 import { RasBotUser } from '../../../interfaces/RasbotUser'
@@ -12,7 +12,7 @@ import { userTable } from './Default'
  * @throws error: 쿼리 오류. 보통 서버가 없거나 파일을 못 찾았거나.
  */
 export const searchUser = async (id: string): Promise<QueryResult<RasBotUser>> => {
-    const database: PoolClient = await connection.connect()
+    const database: PoolClient = await pgConnection.connect()
     const searchQuery: string = `select * from ${userTable} where id = $1;`
     const params: string[] = [id]
     try {

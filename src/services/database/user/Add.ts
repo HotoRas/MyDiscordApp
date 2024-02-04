@@ -1,4 +1,4 @@
-import { connection } from '../pgsql'
+import { pgConnection } from '../../../pgsql'
 import { log } from 'console'
 import { PoolClient, QueryResult } from 'pg'
 import { searchUser } from './Search'
@@ -11,7 +11,7 @@ import { userTable } from './Default'
  * @returns 200: 성공; 201: 갱신됨; 500: 오류; 401: 이미 존재함
  */
 export const addUser = async (id: string, name: string): Promise<number> => {
-    const database: PoolClient = await connection.connect()
+    const database: PoolClient = await pgConnection.connect()
     const addQuery: string = `insert into ${userTable} values ( $1, $2, 0, $3 );`
     const value: string[] = [id, name, '2000-01-01']
     try {

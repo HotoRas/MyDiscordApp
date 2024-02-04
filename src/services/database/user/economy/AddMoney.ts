@@ -1,4 +1,4 @@
-import { connection } from '../pgsql'
+import { pgConnection } from '../../../../pgsql'
 import { PoolClient, QueryResult } from 'pg'
 import { RasBotUser } from '../../../../interfaces/RasbotUser'
 import { searchUser } from '../Search'
@@ -12,7 +12,7 @@ import { userTable } from '../Default'
  * @returns 200: 처리 완료; 500: 오류; 403: 찾을 수 없음
  */
 export const addMoney = async (id: string, moneyDelta: number, updateDate?: boolean): Promise<number> => {
-    const database: PoolClient = await connection.connect()
+    const database: PoolClient = await pgConnection.connect()
     const addQuery: string = `update ${userTable} set balance = $2${updateDate ? ' , lastvisit = NOW() :: DATE' : ''} where id = $1::varchar`
     //log(addQuery)
     let result: QueryResult<RasBotUser>

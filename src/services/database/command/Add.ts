@@ -1,4 +1,4 @@
-import { connection } from '../../../pgsql'
+import { pgConnection } from '../../../pgsql'
 import { log } from 'console'
 import { PoolClient, QueryResult } from 'pg'
 import { LearnableCommand } from '../../../interfaces/LearnableCommand'
@@ -13,7 +13,7 @@ import { Snowflake } from 'discord.js'
  * @returns 200: 성공; 500: 오류; 403: 수정할 수 없음
  */
 export const addCommand = async (command: string, answer: string, teacher: Snowflake): Promise<number> => {
-    const database: PoolClient = await connection.connect()
+    const database: PoolClient = await pgConnection.connect()
     const addQuery: string = `insert into ${commandTable} values ( $1, $2, true, $3 );`
     try {
         let result: QueryResult<LearnableCommand> = await searchCommand(command)

@@ -4,7 +4,8 @@ import { Extension, applicationCommand, listener } from '@pikokr/command.ts'
 import { ApplicationCommandType, ChatInputCommandInteraction, Message } from 'discord.js'
 import { log } from 'console'
 import { QueryResult } from 'pg'
-import { searchUser, tUser } from './Register'
+import { searchUser } from '../services/database/user'
+import { RasBotUser } from '../interfaces/RasbotUser'
 
 export function checkKimustoryCommunityLounge(m: Message | ChatInputCommandInteraction): boolean {
   return m.guildId === "604137297033691137" && m.channelId === "858627537994383401"
@@ -72,7 +73,7 @@ class HelloExtension extends Extension {
     const result: LearnableCommand = query.rows[0]
     log(`Command found: ${result.command} --> ${result.answer}; editable: ${result.editable}; from: ${result.learnfrom}`)
     const answer: string = query.rows[0].answer
-    const getUser: QueryResult<tUser> = await searchUser(result.learnfrom)
+    const getUser: QueryResult<RasBotUser> = await searchUser(result.learnfrom)
     const learnfrom: string = '\n`' + getUser.rowCount ? getUser.rows[0].name : result.learnfrom + ' 님이 가르쳐 주셨어요!`'
     await msg.reply(answer/* + learnfrom*/)
   }

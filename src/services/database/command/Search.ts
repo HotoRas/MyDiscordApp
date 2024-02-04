@@ -1,4 +1,4 @@
-import { connection } from '../../../pgsql'
+import { pgConnection } from '../../../pgsql'
 import { log } from 'console'
 import { PoolClient, QueryResult } from 'pg'
 import { LearnableCommand } from '../../../interfaces/LearnableCommand'
@@ -14,7 +14,7 @@ import { commandTable } from './Default'
  * @throws error: 쿼리 오류. 보통 서버가 없거나 파일을 못 찾았거나.
  */
 export const searchCommand = async (cmd: string): Promise<QueryResult<LearnableCommand>> => {
-    const database: PoolClient = await connection.connect()
+    const database: PoolClient = await pgConnection.connect()
     const searchQuery: string = `select * from ${commandTable} where command = $1;`
     const params: string[] = [cmd]
     try {
