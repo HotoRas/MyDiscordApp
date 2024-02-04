@@ -10,7 +10,7 @@ import { RasbotCompany } from '../interfaces/Company'
 
 class EconomyExtension extends Extension {
     @applicationCommand({
-        name: 'myMoney',
+        name: 'my-money',
         nameLocalizations: { ko: '내돈' },
         type: ApplicationCommandType.ChatInput,
         description: 'Shows your money you have now',
@@ -55,7 +55,7 @@ class EconomyExtension extends Extension {
         @option({
             type: ApplicationCommandOptionType.String,
             name: 'company-name',
-            name_localizations: { ko: '회사 이름' },
+            name_localizations: { ko: '회사이름' },
             description: "Please set the company's name!",
             description_localizations: { ko: '회사 이름을 정해주세요!' },
             required: true

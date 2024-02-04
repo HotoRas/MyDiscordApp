@@ -12,7 +12,7 @@ const muvelApiNovelsTitle: string = `${muvelApiNovels}?title=`
 
 class MuvelExtension extends Extension {
     @applicationCommand({
-        name: 'muvelSearch',
+        name: 'muvel-search',
         nameLocalizations: { ko: '뮤블검색' },
         type: ApplicationCommandType.ChatInput,
         description: 'Tell you the search result from Muvel',
@@ -22,7 +22,7 @@ class MuvelExtension extends Extension {
         i: ChatInputCommandInteraction,
         @option({
             type: ApplicationCommandOptionType.String,
-            name: 'Title',
+            name: 'title',
             name_localizations: { ko: '제목' },
             description: "Please enter the title you're to search!",
             description_localizations: { ko: '소설의 제목을 입력해주세요!' },
